@@ -1,0 +1,61 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+devtools::load_all()
+```
+
+
+```{r read_pcbs}
+#CHANGE THESE PARAMETERS
+#this.folder <- "base_runs" #
+model.var <- c(1) # different model versions that are used
+
+#folder.paths <- c("/nfsdata/PCBresults", "/nfsdata/PCBresults_maternal_transfer", "/nfsdata/PCBresults_allgroups")
+folder.paths <- c("/nfsdata/PCBresults_allgroups_nmt")
+bgm_file     <- here("data","PugetSound_89b_070116.bgm")
+yearsrun     <- 30
+outputfrequency <- 10 # 1 = daily
+
+
+#specify output frequency and years run
+model.ver <- 1:length(folder.paths)
+
+theseyears <- 1:yearsrun
+
+thistimestep <- (yearsrun*365)/outputfrequency #this is max number of timesteps/73 output frequency
+
+maxtimestep <- yearsrun*365
+
+# Fg data
+fg.list <- read_csv(here("data",'PugetSoundAtlantisFunctionalGroups_2024_V1.csv')) %>%
+  dplyr::select(Code, IsTurnedOn, GroupType, NumCohorts, Name, longname) %>%
+  filter(!Code %in% c("DIN","DL")) %>%
+  filter(IsTurnedOn == 1)%>%
+  rename(name = Name)
+
+scenario.names <- c("all_groups nomt")
+
+pcb.data.conc <- get_pbc_data(fg.list, folder.paths, scenario.names, outputfrequency)
+
+
+make_pcb_barplot(pcb.data.conc, group.atlantis.data, fg.list)
+  
+make_pcb_barplot_mammal(pcb.data.conc, group.atlantis.data, fg.list)
+
+```
+
+```{r}
+print("Graphing output")
+lapply("PCB118", make_graph, group.atlantis.data)
+
+
+list.files(eachfolder,  pattern="*.*pdf")%>%
+  paste0(eachfolder,"/",.) %>%
+  pdf_combine(., output = paste0(eachfolder,"/PCB_output.pdf"))
+
+```
+
