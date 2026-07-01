@@ -41,6 +41,7 @@ scenario.names <- c("all_groups nomt")
 
 pcb.data.conc <- get_pbc_data(fg.list, folder.paths, scenario.names, outputfrequency)
 
+readr::write_csv(pcb.data.conc, here::here("output","pcb_data_conc.csv"))
 
 make_pcb_barplot(pcb.data.conc, group.atlantis.data, fg.list)
   
